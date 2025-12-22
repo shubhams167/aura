@@ -1,13 +1,15 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
+import { NavLinks } from "@/components/nav-links";
 import { auth } from "@/lib/auth";
 
 export async function Navbar() {
 	const session = await auth();
+	const isAuthenticated = !!session?.user;
 
 	return (
 		<nav className="relative z-10 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 lg:py-6 border-b border-zinc-200 dark:border-white/5">
@@ -23,20 +25,7 @@ export async function Navbar() {
 				</Badge>
 			</div>
 			<div className="flex items-center gap-1 sm:gap-2 lg:gap-4">
-				<Button
-					variant="ghost"
-					className="hidden md:inline-flex text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white text-sm lg:text-base"
-					asChild
-				>
-					<Link href="#">Markets</Link>
-				</Button>
-				<Button
-					variant="ghost"
-					className="hidden md:inline-flex text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white text-sm lg:text-base"
-					asChild
-				>
-					<Link href="#">Portfolio</Link>
-				</Button>
+				<NavLinks isAuthenticated={isAuthenticated} />
 				<ThemeToggle />
 
 				{session?.user ? (
