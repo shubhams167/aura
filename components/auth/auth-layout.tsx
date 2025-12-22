@@ -1,5 +1,7 @@
 import { Logo } from "@/components/logo";
 import Link from "next/link";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -7,7 +9,17 @@ interface AuthLayoutProps {
   description: string;
 }
 
-export function AuthLayout({ children, title, description }: AuthLayoutProps) {
+export async function AuthLayout({
+  children,
+  title,
+  description,
+}: AuthLayoutProps) {
+  // Redirect to home if already logged in
+  const session = await auth();
+  if (session?.user) {
+    redirect("/");
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-zinc-100 via-zinc-50 to-white dark:from-zinc-900 dark:via-zinc-950 dark:to-black">
       {/* Background effects */}

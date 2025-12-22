@@ -27,7 +27,7 @@ export default function SignupPage() {
   const onSubmit = async (data: SignupFormData) => {
     setIsLoading(true);
     try {
-      // TODO: Implement actual signup logic
+      // TODO: Implement email/password signup logic
       console.log("Signup data:", data);
       await new Promise((resolve) => setTimeout(resolve, 1000));
     } catch (error) {
@@ -37,11 +37,6 @@ export default function SignupPage() {
     }
   };
 
-  const handleSocialSignup = (provider: "google" | "microsoft") => {
-    // TODO: Implement OAuth signup
-    console.log(`Signup with ${provider}`);
-  };
-
   return (
     <AuthLayout
       title="Create an account"
@@ -49,16 +44,8 @@ export default function SignupPage() {
     >
       {/* Social signup buttons */}
       <div className="space-y-3 mb-6">
-        <SocialButton
-          provider="google"
-          onClick={() => handleSocialSignup("google")}
-          disabled={isLoading}
-        />
-        <SocialButton
-          provider="microsoft"
-          onClick={() => handleSocialSignup("microsoft")}
-          disabled={isLoading}
-        />
+        <SocialButton provider="google" disabled={isLoading} />
+        <SocialButton provider="microsoft" disabled={isLoading} />
       </div>
 
       {/* Divider */}

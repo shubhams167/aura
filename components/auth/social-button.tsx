@@ -1,16 +1,17 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { signInWithGoogle } from "@/lib/actions/auth";
 
 interface SocialButtonProps {
   provider: "google" | "microsoft";
-  onClick?: () => void;
   disabled?: boolean;
 }
 
 const providerConfig = {
   google: {
     name: "Google",
+    action: signInWithGoogle,
     icon: (
       <svg className="w-5 h-5" viewBox="0 0 24 24">
         <path
@@ -34,6 +35,7 @@ const providerConfig = {
   },
   microsoft: {
     name: "Microsoft",
+    action: null, // Not configured yet
     icon: (
       <svg className="w-5 h-5" viewBox="0 0 24 24">
         <path fill="#F25022" d="M1 1h10v10H1z" />
@@ -45,18 +47,37 @@ const providerConfig = {
   },
 };
 
-export function SocialButton({
-  provider,
-  onClick,
-  disabled,
-}: SocialButtonProps) {
+export function SocialButton({ provider, disabled }: SocialButtonProps) {
   const config = providerConfig[provider];
 
+  // Use form action for server actions
+  if (config.action) {
+    return (
+      <form action={config.action}>
+        <button
+          type="submit"
+          disabled={disabled}
+          className={cn(
+            "flex items-center justify-center gap-3 w-full h-12 px-4 rounded-lg",
+            "bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700",
+            "text-zinc-700 dark:text-zinc-300 font-medium text-sm",
+            "hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors",
+            "disabled:opacity-50 disabled:cursor-not-allowed"
+          )}
+        >
+          {config.icon}
+          Continue with {config.name}
+        </button>
+      </form>
+    );
+  }
+
+  // Fallback for providers not yet configured
   return (
     <button
       type="button"
-      onClick={onClick}
       disabled={disabled}
+      onClick={() => console.log(`${provider} OAuth not configured yet`)}
       className={cn(
         "flex items-center justify-center gap-3 w-full h-12 px-4 rounded-lg",
         "bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700",

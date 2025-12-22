@@ -28,7 +28,7 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
-      // TODO: Implement actual login logic
+      // TODO: Implement email/password login logic
       console.log("Login data:", data);
       await new Promise((resolve) => setTimeout(resolve, 1000));
     } catch (error) {
@@ -36,11 +36,6 @@ export default function LoginPage() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleSocialLogin = (provider: "google" | "microsoft") => {
-    // TODO: Implement OAuth login
-    console.log(`Login with ${provider}`);
   };
 
   const handleForgotPassword = async (email: string) => {
@@ -64,16 +59,8 @@ export default function LoginPage() {
     >
       {/* Social login buttons */}
       <div className="space-y-3 mb-6">
-        <SocialButton
-          provider="google"
-          onClick={() => handleSocialLogin("google")}
-          disabled={isLoading}
-        />
-        <SocialButton
-          provider="microsoft"
-          onClick={() => handleSocialLogin("microsoft")}
-          disabled={isLoading}
-        />
+        <SocialButton provider="google" disabled={isLoading} />
+        <SocialButton provider="microsoft" disabled={isLoading} />
       </div>
 
       {/* Divider */}
