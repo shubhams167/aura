@@ -59,8 +59,8 @@ export function PortfolioChart() {
                   borderRadius: "8px",
                   color: "#fff",
                 }}
-                formatter={(value: number) => [
-                  `$${value.toLocaleString()}`,
+                formatter={(value) => [
+                  `$${value?.toLocaleString()}`,
                   "Value",
                 ]}
                 labelStyle={{ color: "#9CA3AF" }}
