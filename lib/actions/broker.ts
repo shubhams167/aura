@@ -6,6 +6,14 @@ import { brokerCredentials } from "@/lib/db/schema";
 import { encryptCredentials, decryptCredentials } from "@/lib/crypto";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import {
+  getGrowwAccessToken,
+  getGrowwHoldings as fetchGrowwHoldings,
+  getGrowwPositions as fetchGrowwPositions,
+  getGrowwLTP,
+  enrichHoldings,
+  EnrichedHolding
+} from "@/lib/api/groww";
 
 export type BrokerType = "groww" | "upstox" | "zerodha";
 
@@ -169,5 +177,73 @@ export async function getBrokerCredentials(
   } catch (error) {
     console.error("Error getting broker credentials:", error);
     return null;
+  }
+}
+
+/**
+ * Fetch Groww holdings with live prices using user's stored credentials
+ */
+export async function getGrowwHoldings(): Promise<{
+  success: true;
+  holdings: EnrichedHolding[];
+} | {
+  success: false;
+  error: string;
+}> {
+  try {
+    const userCreds = await getBrokerCredentials("groww");
+
+    if (!userCreds) {
+      return { success: false, error: "Groww account not connected. Please connect your Groww account first." };
+    }
+
+    const accessToken = await getGrowwAccessToken(userCreds.apiKey, userCreds.apiSecret);
+    const holdings = await fetchGrowwHoldings(accessToken);
+
+    // Fetch live prices for all holdings
+    let prices: Record<string, number> = {};
+    if (holdings.length > 0) {
+      const symbols = holdings.map((h) => h.trading_symbol);
+      try {
+        prices = await getGrowwLTP(accessToken, symbols);
+      } catch (ltpError) {
+        console.warn("Failed to fetch LTP, using average prices:", ltpError);
+      }
+    }
+
+    // Enrich holdings with live prices and P&L
+    const enrichedHoldings = enrichHoldings(holdings, prices);
+
+    return { success: true, holdings: enrichedHoldings };
+  } catch (error) {
+    console.error("Error fetching Groww holdings:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to fetch holdings",
+    };
+  }
+}
+
+/**
+ * Fetch Groww positions using user's stored credentials from database
+ */
+export async function getGrowwPortfolioPositions(segment: "CASH" | "FNO" | "COMMODITY" = "CASH") {
+  try {
+    const userCreds = await getBrokerCredentials("groww");
+
+    if (!userCreds) {
+      return { success: false as const, error: "Groww account not connected. Please connect your Groww account first." };
+    }
+
+    const accessToken = await getGrowwAccessToken(userCreds.apiKey, userCreds.apiSecret);
+    const positions = await fetchGrowwPositions(accessToken, segment);
+
+    return { success: true as const, positions };
+  } catch (error) {
+    console.error("Error fetching Groww positions:", error);
+    return {
+      success: false as const,
+      error: error instanceof Error ? error.message : "Failed to fetch positions",
+    };
   }
 }

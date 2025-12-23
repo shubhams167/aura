@@ -1,106 +1,62 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { portfolioSummary } from "@/lib/data/portfolio";
 import { cn } from "@/lib/utils";
-import { TrendingUp, TrendingDown, DollarSign, Activity } from "lucide-react";
+import { TrendingUp, TrendingDown } from "lucide-react";
+import { EnrichedHolding } from "@/lib/api/groww";
 
-interface SummaryCardProps {
-  title: string;
-  value: string;
-  change?: string;
-  changePercent?: number;
-  icon: React.ReactNode;
+interface PortfolioSummaryProps {
+  holdings: EnrichedHolding[];
 }
 
-function SummaryCard({
-  title,
-  value,
-  change,
-  changePercent,
-  icon,
-}: SummaryCardProps) {
-  const isPositive = changePercent === undefined || changePercent >= 0;
+export function PortfolioSummary({ holdings }: PortfolioSummaryProps) {
+  const totalInvested = holdings.reduce((sum, h) => sum + h.invested_value, 0);
+  const totalCurrentValue = holdings.reduce((sum, h) => sum + h.current_value, 0);
+  const totalPnL = holdings.reduce((sum, h) => sum + h.pnl, 0);
+  const totalPnLPercent = totalInvested > 0 ? (totalPnL / totalInvested) * 100 : 0;
+
+  const isProfitable = totalPnL >= 0;
 
   return (
     <Card className="bg-white/80 dark:bg-zinc-900/80 border-zinc-200 dark:border-zinc-800 backdrop-blur-xl">
-      <CardContent className="p-4 sm:p-6">
-        <div className="flex items-start justify-between">
+      <CardContent className="p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          {/* Current Value - Main Focus */}
           <div>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-1">
-              {title}
+              Current Value
             </p>
-            <p className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white">
-              {value}
+            <p className="text-3xl sm:text-4xl font-bold text-zinc-900 dark:text-white">
+              ₹{totalCurrentValue.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
             </p>
-            {change && (
-              <p
-                className={cn(
-                  "text-sm mt-1",
-                  isPositive ? "text-emerald-500" : "text-red-500"
-                )}
-              >
-                {isPositive ? "+" : ""}
-                {change} ({isPositive ? "+" : ""}
-                {changePercent?.toFixed(2)}%)
-              </p>
-            )}
           </div>
-          <div
-            className={cn(
-              "p-2 rounded-lg",
-              isPositive
-                ? "bg-emerald-500/10 text-emerald-500"
-                : "bg-red-500/10 text-red-500"
-            )}
-          >
-            {icon}
+
+          {/* Invested & P&L */}
+          <div className="flex flex-col sm:items-end gap-2">
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              Invested: <span className="text-zinc-700 dark:text-zinc-300 font-medium">₹{totalInvested.toLocaleString("en-IN", { maximumFractionDigits: 0 })}</span>
+            </p>
+            <div
+              className={cn(
+                "flex items-center gap-2 px-3 py-1.5 rounded-full",
+                isProfitable
+                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                  : "bg-red-500/10 text-red-600 dark:text-red-400"
+              )}
+            >
+              {isProfitable ? (
+                <TrendingUp className="w-4 h-4" />
+              ) : (
+                <TrendingDown className="w-4 h-4" />
+              )}
+              <span className="font-semibold">
+                {isProfitable ? "+" : ""}₹{totalPnL.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
+              </span>
+              <span className="text-sm">
+                ({isProfitable ? "+" : ""}{totalPnLPercent.toFixed(2)}%)
+              </span>
+            </div>
           </div>
         </div>
       </CardContent>
     </Card>
-  );
-}
-
-export function PortfolioSummary() {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <SummaryCard
-        title="Total Value"
-        value={`$${portfolioSummary.totalValue.toLocaleString()}`}
-        icon={<DollarSign className="w-5 h-5" />}
-      />
-      <SummaryCard
-        title="Total Gain/Loss"
-        value={`$${portfolioSummary.totalGain.toLocaleString()}`}
-        change={`$${portfolioSummary.totalGain.toLocaleString()}`}
-        changePercent={portfolioSummary.totalGainPercent}
-        icon={
-          portfolioSummary.totalGain >= 0 ? (
-            <TrendingUp className="w-5 h-5" />
-          ) : (
-            <TrendingDown className="w-5 h-5" />
-          )
-        }
-      />
-      <SummaryCard
-        title="Today's Change"
-        value={`$${portfolioSummary.dayChange.toLocaleString()}`}
-        change={`$${portfolioSummary.dayChange.toLocaleString()}`}
-        changePercent={portfolioSummary.dayChangePercent}
-        icon={
-          portfolioSummary.dayChange >= 0 ? (
-            <TrendingUp className="w-5 h-5" />
-          ) : (
-            <TrendingDown className="w-5 h-5" />
-          )
-        }
-      />
-      <SummaryCard
-        title="Total Return"
-        value={`${portfolioSummary.totalGainPercent.toFixed(2)}%`}
-        change={`${portfolioSummary.totalGainPercent.toFixed(2)}%`}
-        changePercent={portfolioSummary.totalGainPercent}
-        icon={<Activity className="w-5 h-5" />}
-      />
-    </div>
   );
 }

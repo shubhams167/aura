@@ -18,7 +18,7 @@ export function SupportedBrokers() {
         {brokers.map((broker) => (
           <div
             key={broker.name}
-            className="flex items-center gap-2 opacity-60 hover:opacity-100 transition-opacity"
+            className="flex items-center gap-2 opacity-100"
           >
             <div className="w-8 h-8 sm:w-10 sm:h-10 relative">
               <Image

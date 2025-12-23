@@ -109,13 +109,6 @@ export function Hero({ user }: HeroProps) {
 								</svg>
 							</Link>
 						</Button>
-						<Button
-							size="lg"
-							variant="outline"
-							className="w-full sm:w-auto border-zinc-300 dark:border-white/10 text-zinc-900 dark:text-white hover:bg-zinc-100 dark:hover:bg-white/5 px-6 sm:px-8 h-12 sm:h-14 text-base sm:text-lg rounded-full"
-						>
-							View Demo
-						</Button>
 					</div>
 				</>
 			)}
