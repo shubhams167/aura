@@ -18,10 +18,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async signIn({ user, account }) {
       // Store or update user profile in database on sign-in
-      if (account?.provider === "google" && user.email) {
+      if (account?.provider === "google" && user.email && user.id) {
         try {
           const existingProfile = await db.query.userProfiles.findFirst({
-            where: eq(userProfiles.userId, user.id!),
+            where: eq(userProfiles.id, user.id),
           });
 
           if (existingProfile) {
@@ -33,11 +33,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 image: user.image,
                 email: user.email,
               })
-              .where(eq(userProfiles.userId, user.id!));
+              .where(eq(userProfiles.id, user.id));
           } else {
-            // Create new profile
+            // Create new profile using NextAuth user.id as primary key
             await db.insert(userProfiles).values({
-              userId: user.id!,
+              id: user.id,
               email: user.email,
               name: user.name,
               image: user.image,
