@@ -16,12 +16,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     error: "/login",
   },
   callbacks: {
-    async signIn({ user, account }) {
-      // Store or update user profile in database on sign-in
-      if (account?.provider === "google" && user.email && user.id) {
+    async signIn({ user, account, profile }) {
+      // Use Google's sub (subject identifier) as the consistent user ID
+      // profile.sub is the stable Google user ID
+      const googleId = (profile as { sub?: string })?.sub;
+
+      if (account?.provider === "google" && user.email && googleId) {
         try {
           const existingProfile = await db.query.userProfiles.findFirst({
-            where: eq(userProfiles.id, user.id),
+            where: eq(userProfiles.id, googleId),
           });
 
           if (existingProfile) {
@@ -33,11 +36,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 image: user.image,
                 email: user.email,
               })
-              .where(eq(userProfiles.id, user.id));
+              .where(eq(userProfiles.id, googleId));
           } else {
-            // Create new profile using NextAuth user.id as primary key
+            // Create new profile using Google's sub as primary key
             await db.insert(userProfiles).values({
-              id: user.id,
+              id: googleId,
               email: user.email,
               name: user.name,
               image: user.image,
@@ -50,11 +53,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return true;
     },
-    async jwt({ token, user, account }) {
-      // Persist the OAuth access_token and user id to the token right after signin
-      if (account) {
+    async jwt({ token, account, profile }) {
+      // Use Google's sub (profile.sub) as the user ID - it's consistent across logins
+      if (account && profile) {
+        token.id = (profile as { sub?: string })?.sub;
         token.accessToken = account.access_token;
-        token.id = user?.id;
       }
       return token;
     },
