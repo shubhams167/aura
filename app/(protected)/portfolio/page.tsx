@@ -3,7 +3,6 @@ import { Footer } from "@/components/footer";
 import { BackgroundEffects } from "@/components/background-effects";
 import { PortfolioSummary } from "@/components/portfolio/portfolio-summary";
 import { PortfolioChart } from "@/components/portfolio/portfolio-chart";
-import { AllocationChart } from "@/components/portfolio/allocation-chart";
 import { HoldingsList } from "@/components/portfolio/holdings-list";
 import { PositionsList } from "@/components/portfolio/positions-list";
 import { auth } from "@/lib/auth";
@@ -73,14 +72,9 @@ export default async function PortfolioPage() {
                 <PortfolioSummary holdings={holdings} />
               </div>
 
-              {/* Charts Row */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                <div className="lg:col-span-2">
-                  <PortfolioChart holdings={holdings} />
-                </div>
-                <div>
-                  <AllocationChart holdings={holdings} />
-                </div>
+              {/* Chart - Full Width */}
+              <div className="mb-8">
+                <PortfolioChart holdings={holdings} />
               </div>
             </>
           )}
