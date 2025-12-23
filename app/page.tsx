@@ -1,9 +1,9 @@
 import { Navbar } from "@/components/navbar";
 import { Hero } from "@/components/hero";
-import { StatsCards } from "@/components/stats-cards";
-import { TrustBanner } from "@/components/trust-banner";
 import { Footer } from "@/components/footer";
 import { BackgroundEffects } from "@/components/background-effects";
+import { BrokerConnect } from "@/components/broker-connect";
+import { SupportedBrokers } from "@/components/supported-brokers";
 import { auth } from "@/lib/auth";
 
 export default async function Home() {
@@ -16,8 +16,7 @@ export default async function Home() {
 
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 pt-12 sm:pt-16 lg:pt-20 pb-16 sm:pb-24 lg:pb-32">
         <Hero user={session?.user} />
-        <StatsCards />
-        <TrustBanner />
+        {session?.user ? <BrokerConnect /> : <SupportedBrokers />}
       </main>
 
       <Footer />
