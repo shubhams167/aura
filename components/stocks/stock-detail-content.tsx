@@ -25,6 +25,7 @@ import {
 } from "recharts";
 import { AddToWatchlistMenu } from "@/components/watchlists/add-to-watchlist-menu";
 import { StockLogo } from "./stock-logo";
+import { StockNews } from "./stock-news";
 
 interface StockDetailContentProps {
   symbol: string;
@@ -374,6 +375,9 @@ export function StockDetailContent({ symbol }: StockDetailContentProps) {
           )}
         </div>
       </div>
+
+      {/* Latest News */}
+      <StockNews symbol={symbol} />
     </div>
   );
 }
