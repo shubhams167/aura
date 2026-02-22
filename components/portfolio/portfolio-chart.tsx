@@ -8,10 +8,9 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
-  ReferenceLine,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { EnrichedHolding } from "@/lib/api/groww";
+import { UnifiedHolding } from "@/lib/types/holdings";
 
 // Generate colors - green for profit, red for loss
 function getPnLColor(pnl: number): string {
@@ -19,7 +18,7 @@ function getPnLColor(pnl: number): string {
 }
 
 interface PortfolioChartProps {
-  holdings: EnrichedHolding[];
+  holdings: UnifiedHolding[];
 }
 
 // Custom tooltip component

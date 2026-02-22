@@ -98,3 +98,33 @@ export function decryptCredentials(
 
   return { apiKey, apiSecret };
 }
+
+/**
+ * Encrypts an access token for storage (OAuth-based brokers)
+ */
+export function encryptAccessToken(accessToken: string): {
+  encryptedAccessToken: string;
+  accessTokenIv: string;
+} {
+  const tokenData = encrypt(accessToken);
+  return {
+    encryptedAccessToken: `${tokenData.encrypted}:${tokenData.authTag}`,
+    accessTokenIv: tokenData.iv,
+  };
+}
+
+/**
+ * Decrypts a stored access token
+ */
+export function decryptAccessToken(
+  encryptedAccessToken: string,
+  accessTokenIv: string
+): string {
+  const [tokenEncrypted, tokenAuthTag] = encryptedAccessToken.split(":");
+  return decrypt({
+    encrypted: tokenEncrypted,
+    iv: accessTokenIv,
+    authTag: tokenAuthTag,
+  });
+}
+

@@ -1,10 +1,10 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { TrendingUp, TrendingDown } from "lucide-react";
-import { EnrichedHolding } from "@/lib/api/groww";
+import { UnifiedHolding } from "@/lib/types/holdings";
 
 interface PortfolioSummaryProps {
-  holdings: EnrichedHolding[];
+  holdings: UnifiedHolding[];
 }
 
 export function PortfolioSummary({ holdings }: PortfolioSummaryProps) {

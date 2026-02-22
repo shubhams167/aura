@@ -25,6 +25,10 @@ export const brokerCredentials = pgTable("broker_credentials", {
   encryptedApiSecret: text("encrypted_api_secret").notNull(), // AES-256 encrypted
   iv: text("iv").notNull(), // Initialization vector for API key
   ivSecret: text("iv_secret").notNull(), // Initialization vector for API secret
+  // OAuth-based brokers (Zerodha) - access token storage
+  encryptedAccessToken: text("encrypted_access_token"), // For OAuth-based brokers
+  accessTokenIv: text("access_token_iv"),
+  accessTokenExpiry: timestamp("access_token_expiry", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

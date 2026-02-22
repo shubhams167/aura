@@ -9,8 +9,9 @@ import {
   disconnectBroker,
   BrokerType,
   BrokerConnection,
+  getZerodhaConnectionStatus,
 } from "@/lib/actions/broker";
-import { Check, Link2, Unlink, Loader2, RefreshCw } from "lucide-react";
+import { Check, Link2, Unlink, Loader2, RefreshCw, LogIn, AlertTriangle } from "lucide-react";
 import Image from "next/image";
 
 const brokerDetails: Record<
@@ -20,6 +21,7 @@ const brokerDetails: Record<
     description: string;
     logo: string;
     bgColor: string;
+    useOAuth?: boolean;
   }
 > = {
   groww: {
@@ -39,8 +41,16 @@ const brokerDetails: Record<
     description: "India's Largest Stock Broker",
     logo: "/logos/zerodha.svg",
     bgColor: "bg-[#387ED1]/10",
+    useOAuth: true,
   },
 };
+
+interface ZerodhaStatus {
+  connected: boolean;
+  hasCredentials: boolean;
+  hasValidToken: boolean;
+  tokenExpiresAt?: Date;
+}
 
 export function BrokerConnect() {
   const [connections, setConnections] = useState<BrokerConnection[]>([]);
@@ -49,11 +59,16 @@ export function BrokerConnect() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [disconnecting, setDisconnecting] = useState<BrokerType | null>(null);
+  const [zerodhaStatus, setZerodhaStatus] = useState<ZerodhaStatus | null>(null);
 
   const loadConnections = async () => {
     setIsLoading(true);
-    const data = await getBrokerConnections();
+    const [data, zStatus] = await Promise.all([
+      getBrokerConnections(),
+      getZerodhaConnectionStatus(),
+    ]);
     setConnections(data);
+    setZerodhaStatus(zStatus);
     setIsLoading(false);
   };
 
@@ -73,6 +88,11 @@ export function BrokerConnect() {
     setIsModalOpen(true);
   };
 
+  const handleZerodhaLogin = () => {
+    // Redirect to Zerodha OAuth login
+    window.location.href = "/api/auth/zerodha/login";
+  };
+
   const handleDisconnect = async (broker: BrokerType) => {
     setDisconnecting(broker);
     await disconnectBroker(broker);
@@ -83,6 +103,9 @@ export function BrokerConnect() {
   const handleSuccess = () => {
     loadConnections();
   };
+
+  // Check if Zerodha needs re-authentication
+  const zerodhaNeedsReauth = zerodhaStatus?.hasCredentials && !zerodhaStatus?.hasValidToken;
 
   return (
     <section className="w-full max-w-4xl mx-auto mt-12 sm:mt-16">
@@ -100,20 +123,32 @@ export function BrokerConnect() {
           const details = brokerDetails[broker];
           const connection = connections.find((c) => c.broker === broker);
           const isConnected = connection?.connected;
+          const isZerodha = broker === "zerodha";
+          const showZerodhaReauth = isZerodha && zerodhaNeedsReauth;
 
           return (
             <div
               key={broker}
               className={`relative p-5 rounded-2xl border transition-all duration-300 ${isConnected
-                ? "border-emerald-300 dark:border-emerald-700 bg-emerald-50/50 dark:bg-emerald-900/10"
+                ? showZerodhaReauth
+                  ? "border-amber-300 dark:border-amber-700 bg-amber-50/50 dark:bg-amber-900/10"
+                  : "border-emerald-300 dark:border-emerald-700 bg-emerald-50/50 dark:bg-emerald-900/10"
                 : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:border-zinc-300 dark:hover:border-zinc-700"
                 }`}
             >
               {/* Connected Badge */}
-              {isConnected && (
+              {isConnected && !showZerodhaReauth && (
                 <Badge className="absolute -top-2 -right-2 bg-emerald-500 text-white border-0 text-xs">
                   <Check className="w-3 h-3 mr-1" />
                   Connected
+                </Badge>
+              )}
+
+              {/* Re-auth needed badge */}
+              {showZerodhaReauth && (
+                <Badge className="absolute -top-2 -right-2 bg-amber-500 text-white border-0 text-xs">
+                  <AlertTriangle className="w-3 h-3 mr-1" />
+                  Session Expired
                 </Badge>
               )}
 
@@ -151,6 +186,32 @@ export function BrokerConnect() {
                 </Button>
               ) : isConnected ? (
                 <div className="space-y-2">
+                  {/* Zerodha re-auth button */}
+                  {showZerodhaReauth && (
+                    <Button
+                      size="sm"
+                      className="w-full bg-amber-500 hover:bg-amber-600 text-white"
+                      onClick={handleZerodhaLogin}
+                    >
+                      <LogIn className="w-4 h-4 mr-2" />
+                      Re-authenticate
+                    </Button>
+                  )}
+
+                  {/* For Zerodha with valid token, show login button to re-auth if needed */}
+                  {isZerodha && zerodhaStatus?.hasValidToken && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                      onClick={handleZerodhaLogin}
+                    >
+                      <LogIn className="w-4 h-4 mr-2" />
+                      Refresh Session
+                    </Button>
+                  )}
+
+                  {/* Update credentials - show for non-OAuth brokers or for setting API keys */}
                   <Button
                     variant="outline"
                     size="sm"
@@ -160,6 +221,7 @@ export function BrokerConnect() {
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Update Credentials
                   </Button>
+
                   <Button
                     variant="outline"
                     size="sm"

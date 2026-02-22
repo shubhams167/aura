@@ -7,13 +7,17 @@ import { UserMenu } from "@/components/user-menu";
 import { NavLinks } from "@/components/nav-links";
 import { auth } from "@/lib/auth";
 
-export async function Navbar() {
+interface NavbarProps {
+	searchSlot?: React.ReactNode;
+}
+
+export async function Navbar({ searchSlot }: NavbarProps = {}) {
 	const session = await auth();
 	const isAuthenticated = !!session?.user;
 
 	return (
-		<nav className="relative z-10 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 lg:py-6 border-b border-zinc-200 dark:border-white/5">
-			<div className="flex items-center gap-2 sm:gap-3">
+		<nav className="relative z-10 flex items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 py-3 lg:py-4 border-b border-zinc-200 dark:border-white/5">
+			<div className="flex items-center gap-2 sm:gap-3 shrink-0">
 				<Link href="/">
 					<Logo size="sm" />
 				</Link>
@@ -24,7 +28,14 @@ export async function Navbar() {
 					Beta
 				</Badge>
 			</div>
-			<div className="flex items-center gap-1 sm:gap-2 lg:gap-4">
+
+			{searchSlot && isAuthenticated && (
+				<div className="hidden md:flex flex-1 justify-center max-w-xl">
+					{searchSlot}
+				</div>
+			)}
+
+			<div className="flex items-center gap-1 sm:gap-2 lg:gap-4 shrink-0">
 				<NavLinks isAuthenticated={isAuthenticated} />
 				<ThemeToggle />
 

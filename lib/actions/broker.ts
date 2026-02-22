@@ -9,7 +9,6 @@ import { revalidatePath } from "next/cache";
 import {
   getGrowwAccessToken,
   getGrowwHoldings as fetchGrowwHoldings,
-  getGrowwPositions as fetchGrowwPositions,
   getGrowwLTP,
   enrichHoldings,
   EnrichedHolding
@@ -225,25 +224,85 @@ export async function getGrowwHoldings(): Promise<{
 }
 
 /**
- * Fetch Groww positions using user's stored credentials from database
+ * Check if Zerodha access token is valid (not expired)
  */
-export async function getGrowwPortfolioPositions(segment: "CASH" | "FNO" | "COMMODITY" = "CASH") {
+export async function isZerodhaTokenValid(): Promise<{
+  valid: boolean;
+  needsReauth: boolean;
+  expiresAt?: Date;
+}> {
   try {
-    const userCreds = await getBrokerCredentials("groww");
-
-    if (!userCreds) {
-      return { success: false as const, error: "Groww account not connected. Please connect your Groww account first." };
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { valid: false, needsReauth: true };
     }
 
-    const accessToken = await getGrowwAccessToken(userCreds.apiKey, userCreds.apiSecret);
-    const positions = await fetchGrowwPositions(accessToken, segment);
+    const connection = await db.query.brokerCredentials.findFirst({
+      where: and(
+        eq(brokerCredentials.userId, session.user.id),
+        eq(brokerCredentials.broker, "zerodha")
+      ),
+    });
 
-    return { success: true as const, positions };
-  } catch (error) {
-    console.error("Error fetching Groww positions:", error);
+    if (!connection) {
+      return { valid: false, needsReauth: false }; // Not connected at all
+    }
+
+    if (!connection.encryptedAccessToken || !connection.accessTokenExpiry) {
+      return { valid: false, needsReauth: true }; // Connected but no token
+    }
+
+    const isExpired = new Date() > connection.accessTokenExpiry;
     return {
-      success: false as const,
-      error: error instanceof Error ? error.message : "Failed to fetch positions",
+      valid: !isExpired,
+      needsReauth: isExpired,
+      expiresAt: connection.accessTokenExpiry,
     };
+  } catch (error) {
+    console.error("Error checking Zerodha token:", error);
+    return { valid: false, needsReauth: true };
+  }
+}
+
+/**
+ * Get Zerodha connection status with detailed information
+ */
+export async function getZerodhaConnectionStatus(): Promise<{
+  connected: boolean;
+  hasCredentials: boolean;
+  hasValidToken: boolean;
+  tokenExpiresAt?: Date;
+}> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { connected: false, hasCredentials: false, hasValidToken: false };
+    }
+
+    const connection = await db.query.brokerCredentials.findFirst({
+      where: and(
+        eq(brokerCredentials.userId, session.user.id),
+        eq(brokerCredentials.broker, "zerodha")
+      ),
+    });
+
+    if (!connection) {
+      return { connected: false, hasCredentials: false, hasValidToken: false };
+    }
+
+    const hasToken = !!connection.encryptedAccessToken;
+    const isExpired = connection.accessTokenExpiry
+      ? new Date() > connection.accessTokenExpiry
+      : true;
+
+    return {
+      connected: true,
+      hasCredentials: true,
+      hasValidToken: hasToken && !isExpired,
+      tokenExpiresAt: connection.accessTokenExpiry ?? undefined,
+    };
+  } catch (error) {
+    console.error("Error getting Zerodha status:", error);
+    return { connected: false, hasCredentials: false, hasValidToken: false };
   }
 }

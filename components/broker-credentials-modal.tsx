@@ -32,6 +32,8 @@ const brokerInfo: Record<
     instructions: string[];
     portalUrl: string;
     portalName: string;
+    useOAuth?: boolean;
+    oauthNote?: string;
   }
 > = {
   groww: {
@@ -65,13 +67,15 @@ const brokerInfo: Record<
     logo: "/logos/zerodha.svg",
     bgColor: "bg-[#387ED1]/10",
     instructions: [
-      "Log in to Kite Connect Developer",
-      "Go to 'Create App' or select existing app",
-      "Note down your API Key",
-      "Generate and copy your API Secret",
+      "Log in to Kite Connect Developer portal",
+      "Create an app with your redirect URL",
+      "Note down your API Key and Secret",
+      "After saving, you'll be redirected to Zerodha to log in",
     ],
     portalUrl: "https://developers.kite.trade/",
     portalName: "Kite Connect",
+    useOAuth: true,
+    oauthNote: "Zerodha uses OAuth login. After saving your API credentials, you'll need to log in to your Zerodha account. Sessions expire daily at 6 AM.",
   },
 };
 
@@ -166,6 +170,16 @@ export function BrokerCredentialsModal({
               <ExternalLink className="w-3 h-3" />
             </a>
           </div>
+
+          {/* OAuth Note for Zerodha */}
+          {info.oauthNote && (
+            <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 flex items-start gap-2">
+              <Shield className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
+              <p className="text-xs text-blue-700 dark:text-blue-300">
+                {info.oauthNote}
+              </p>
+            </div>
+          )}
 
           {/* Form Fields */}
           <div className="space-y-3">
