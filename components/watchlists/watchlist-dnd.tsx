@@ -22,7 +22,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import type { Watchlist, WatchlistItem } from "./watchlist-manager";
 
 // We need quote data to show the stock info in the list
@@ -143,7 +143,7 @@ export function WatchlistDnd({ watchlist }: { watchlist: Watchlist }) {
 }
 
 // Instead of 'any' for quote, let's use a basic Record or specific type
-type QuoteData = { price?: number; change?: number; change_percent?: number; name?: string; logo_url?: string; domain_url?: string };
+type QuoteData = { price?: number; change?: number; change_percent?: number; name?: string; logo_url?: string; domain_url?: string; currency?: string };
 
 function SortableWatchlistItem({ item, quote, onRemove }: { item: WatchlistItem; quote?: QuoteData; onRemove: () => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
@@ -154,7 +154,7 @@ function SortableWatchlistItem({ item, quote, onRemove }: { item: WatchlistItem;
     zIndex: isDragging ? 50 : 1,
   };
 
-  const isPositive = quote?.change >= 0;
+  const isPositive = (quote?.change ?? 0) >= 0;
 
   return (
     <div
@@ -197,7 +197,7 @@ function SortableWatchlistItem({ item, quote, onRemove }: { item: WatchlistItem;
         {quote ? (
           <div className="text-right">
             <div className="font-medium text-sm text-zinc-900 dark:text-white">
-              ${quote.price.toFixed(2)}
+              {quote.price ? formatCurrency(quote.price, quote.currency) : "—"}
             </div>
             <div
               className={cn(
@@ -206,7 +206,7 @@ function SortableWatchlistItem({ item, quote, onRemove }: { item: WatchlistItem;
               )}
             >
               {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-              {Math.abs(quote.change_percent).toFixed(2)}%
+              {quote.change_percent ? Math.abs(quote.change_percent).toFixed(2) : "0.00"}%
             </div>
           </div>
         ) : (

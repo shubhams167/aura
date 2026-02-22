@@ -14,7 +14,7 @@ import {
   BarChart3,
   ExternalLink,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency, formatCompactCurrency } from "@/lib/utils";
 import {
   AreaChart,
   Area,
@@ -88,10 +88,7 @@ export function StockDetailContent({ symbol }: StockDetailContentProps) {
 
   const formatLargeNumber = (n?: number) => {
     if (!n) return "—";
-    if (n >= 1e12) return `$${(n / 1e12).toFixed(2)}T`;
-    if (n >= 1e9) return `$${(n / 1e9).toFixed(2)}B`;
-    if (n >= 1e6) return `$${(n / 1e6).toFixed(2)}M`;
-    return `$${n.toLocaleString()}`;
+    return formatCompactCurrency(n, profile?.currency || quote?.currency);
   };
 
   return (
@@ -136,7 +133,7 @@ export function StockDetailContent({ symbol }: StockDetailContentProps) {
 
           <div className="text-left sm:text-right">
             <p className="text-3xl sm:text-4xl font-bold text-zinc-900 dark:text-white">
-              ${quote.price?.toFixed(2)}
+              {quote.price ? formatCurrency(quote.price, quote.currency) : "—"}
             </p>
             <div className="flex items-center gap-2 sm:justify-end">
               <div
@@ -227,7 +224,7 @@ export function StockDetailContent({ symbol }: StockDetailContentProps) {
                 tick={{ fontSize: 11, fill: "#a1a1aa" }}
                 axisLine={{ stroke: "currentColor", strokeWidth: 1, className: "text-zinc-200 dark:text-zinc-800" }}
                 tickLine={false}
-                tickFormatter={(v) => `$${v.toFixed(0)}`}
+                tickFormatter={(v) => formatCompactCurrency(v, quote?.currency || history?.currency)}
                 width={60}
               />
               <Tooltip
@@ -245,7 +242,7 @@ export function StockDetailContent({ symbol }: StockDetailContentProps) {
                           })}
                         </p>
                         <p className="text-base font-bold text-zinc-900 dark:text-white mt-1">
-                          ${d.price.toFixed(2)}
+                          {formatCurrency(d.price, quote?.currency || history?.currency)}
                         </p>
                       </div>
                     );
@@ -363,11 +360,11 @@ export function StockDetailContent({ symbol }: StockDetailContentProps) {
               <MetricRow label="Beta" value={profile.beta?.toFixed(2) || "—"} />
               <MetricRow
                 label="52W High"
-                value={profile.fifty_two_week_high ? `$${profile.fifty_two_week_high.toFixed(2)}` : "—"}
+                value={profile.fifty_two_week_high ? formatCurrency(profile.fifty_two_week_high, profile.currency) : "—"}
               />
               <MetricRow
                 label="52W Low"
-                value={profile.fifty_two_week_low ? `$${profile.fifty_two_week_low.toFixed(2)}` : "—"}
+                value={profile.fifty_two_week_low ? formatCurrency(profile.fifty_two_week_low, profile.currency) : "—"}
               />
             </div>
           ) : (

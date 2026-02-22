@@ -1,7 +1,7 @@
 "use client";
 
 import { TrendingUp, TrendingDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency, formatCompactCurrency } from "@/lib/utils";
 import { AddToWatchlistMenu } from "@/components/watchlists/add-to-watchlist-menu";
 import { useRouter } from "next/navigation";
 import { StockLogo } from "./stock-logo";
@@ -29,10 +29,7 @@ export function StockCard({ stock }: StockCardProps) {
 
   const formatMarketCap = (cap?: number) => {
     if (!cap) return "—";
-    if (cap >= 1e12) return `$${(cap / 1e12).toFixed(2)}T`;
-    if (cap >= 1e9) return `$${(cap / 1e9).toFixed(2)}B`;
-    if (cap >= 1e6) return `$${(cap / 1e6).toFixed(2)}M`;
-    return `$${cap.toLocaleString()}`;
+    return formatCompactCurrency(cap, stock.currency);
   };
 
   const formatVolume = (vol?: number) => {
@@ -96,7 +93,7 @@ export function StockCard({ stock }: StockCardProps) {
         {/* Price */}
         <div className="mb-3">
           <p className="text-2xl font-bold text-zinc-900 dark:text-white">
-            ${stock.price.toFixed(2)}
+            {formatCurrency(stock.price, stock.currency)}
           </p>
           <p
             className={cn(
