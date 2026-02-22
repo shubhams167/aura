@@ -65,12 +65,12 @@ export default function GlobalError({
                 >
                   Try again
                 </button>
-                <a
+                <Link
                   href="/"
-                  className="w-full sm:w-auto border border-zinc-700 text-white px-6 h-12 rounded-full font-medium flex items-center justify-center hover:bg-zinc-800 transition-colors"
+                  className="inline-flex h-10 items-center justify-center rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-6 text-sm font-medium text-white transition-colors hover:from-emerald-600 hover:to-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 w-full"
                 >
-                  Go back home
-                </a>
+                  Return to home
+                </Link>
               </div>
             </div>
           </main>

@@ -20,10 +20,11 @@ import {
   Area,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { AddToWatchlistMenu } from "@/components/watchlists/add-to-watchlist-menu";
+import { StockLogo } from "./stock-logo";
 
 interface StockDetailContentProps {
   symbol: string;
@@ -113,22 +114,21 @@ export function StockDetailContent({ symbol }: StockDetailContentProps) {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 dark:from-emerald-500/30 dark:to-emerald-600/20 flex items-center justify-center">
-                <span className="text-base font-bold text-emerald-600 dark:text-emerald-400">
-                  {symbol.slice(0, 2)}
-                </span>
+              <div className="w-12 h-12 overflow-hidden rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 dark:from-emerald-500/30 dark:to-emerald-600/20 flex items-center justify-center shrink-0">
+                <StockLogo symbol={symbol} logoUrl={quote.logo_url} domainUrl={quote.domain_url} size={48} />
               </div>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-white">
                   {quote.name || symbol}
                 </h1>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                  {symbol}
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 flex items-center gap-2">
+                  <span>{symbol}</span>
                   {quote.exchange && (
-                    <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] bg-zinc-100 dark:bg-zinc-800 text-zinc-500">
+                    <span className="px-1.5 py-0.5 rounded text-[10px] bg-zinc-100 dark:bg-zinc-800 text-zinc-500">
                       {quote.exchange}
                     </span>
                   )}
+                  <AddToWatchlistMenu symbol={symbol} className="p-1 -ml-1 text-zinc-400 hover:text-emerald-500" />
                 </p>
               </div>
             </div>
@@ -192,7 +192,7 @@ export function StockDetailContent({ symbol }: StockDetailContentProps) {
           </div>
         ) : chartData.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={chartData}>
+            <AreaChart data={chartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop
@@ -207,11 +207,6 @@ export function StockDetailContent({ symbol }: StockDetailContentProps) {
                   />
                 </linearGradient>
               </defs>
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="currentColor"
-                className="text-zinc-200 dark:text-zinc-800"
-              />
               <XAxis
                 dataKey="date"
                 tickFormatter={(d) => {
@@ -222,7 +217,7 @@ export function StockDetailContent({ symbol }: StockDetailContentProps) {
                   return date.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
                 }}
                 tick={{ fontSize: 11, fill: "#a1a1aa" }}
-                axisLine={false}
+                axisLine={{ stroke: "currentColor", strokeWidth: 1, className: "text-zinc-200 dark:text-zinc-800" }}
                 tickLine={false}
                 interval="preserveStartEnd"
                 minTickGap={40}
@@ -230,7 +225,7 @@ export function StockDetailContent({ symbol }: StockDetailContentProps) {
               <YAxis
                 domain={["auto", "auto"]}
                 tick={{ fontSize: 11, fill: "#a1a1aa" }}
-                axisLine={false}
+                axisLine={{ stroke: "currentColor", strokeWidth: 1, className: "text-zinc-200 dark:text-zinc-800" }}
                 tickLine={false}
                 tickFormatter={(v) => `$${v.toFixed(0)}`}
                 width={60}

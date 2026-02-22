@@ -61,6 +61,24 @@ export function BrokerConnect() {
   const [disconnecting, setDisconnecting] = useState<BrokerType | null>(null);
   const [zerodhaStatus, setZerodhaStatus] = useState<ZerodhaStatus | null>(null);
 
+  useEffect(() => {
+    let mounted = true;
+    const fetchConnections = async () => {
+      setIsLoading(true);
+      const [data, zStatus] = await Promise.all([
+        getBrokerConnections(),
+        getZerodhaConnectionStatus(),
+      ]);
+      if (mounted) {
+        setConnections(data);
+        setZerodhaStatus(zStatus);
+        setIsLoading(false);
+      }
+    };
+    fetchConnections();
+    return () => { mounted = false; };
+  }, []);
+
   const loadConnections = async () => {
     setIsLoading(true);
     const [data, zStatus] = await Promise.all([
@@ -71,10 +89,6 @@ export function BrokerConnect() {
     setZerodhaStatus(zStatus);
     setIsLoading(false);
   };
-
-  useEffect(() => {
-    loadConnections();
-  }, []);
 
   const handleConnect = (broker: BrokerType) => {
     setSelectedBroker(broker);
