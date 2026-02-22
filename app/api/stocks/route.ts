@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const MARKET_DATA_API = process.env.MARKET_DATA_API_URL || "http://localhost:8000";
+const MARKET_DATA_API = process.env.AURA_PULSE_API_URL || "http://localhost:8000";
 
 /**
  * GET /api/stocks?symbols=AAPL,MSFT,GOOGL,...
