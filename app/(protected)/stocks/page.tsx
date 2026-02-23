@@ -2,8 +2,8 @@ import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { BackgroundEffects } from "@/components/background-effects";
 import { StocksContent } from "@/components/stocks/stocks-content";
-import { StockSearch } from "@/components/stocks/stock-search";
 import { WatchlistManager } from "@/components/watchlists/watchlist-manager";
+import { MarketIndices } from "@/components/stocks/market-indices";
 import { BarChart3 } from "lucide-react";
 
 export default function StocksPage() {
@@ -16,6 +16,8 @@ export default function StocksPage() {
         <div className="max-w-[1400px] mx-auto gap-8 grid grid-cols-1 lg:grid-cols-5">
           {/* Left Column (60%) - Trending Stocks */}
           <div className="lg:col-span-3 xl:col-span-3 flex flex-col">
+            <MarketIndices />
+
             {/* Header */}
             <div className="mb-8">
               <div className="flex items-center gap-3 mb-3">

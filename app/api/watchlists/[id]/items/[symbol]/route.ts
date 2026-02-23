@@ -14,7 +14,8 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id, symbol } = await params;
+    const id = (await params).id;
+    const symbol = decodeURIComponent((await params).symbol);
 
     // Verify watchlist ownership
     const list = await db.query.watchlists.findFirst({

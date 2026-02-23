@@ -10,7 +10,7 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ symbol: string }> }
 ) {
-  const { symbol } = await params;
+  const symbol = decodeURIComponent((await params).symbol);
 
   try {
     const res = await fetch(`${MARKET_DATA_API}/api/v1/profile/${symbol.toUpperCase()}`, {

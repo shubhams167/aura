@@ -105,6 +105,7 @@ export const wallets = pgTable("wallets", {
   userId: text("user_id")
     .notNull()
     .references(() => userProfiles.id, { onDelete: "cascade" }),
+  currency: text("currency").notNull().default("USD"),
   // Using numeric/decimal to avoid floating point issues, storing as string in JS, or we can use double for simplicity of prototyping.
   // We'll use double precision for floating point mapping to JS number
   balance: text("balance").notNull().default("100000"), // Stored as text to maintain precision, parsed to float in TS

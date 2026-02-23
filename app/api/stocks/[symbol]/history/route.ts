@@ -10,7 +10,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ symbol: string }> }
 ) {
-  const { symbol } = await params;
+  const symbol = decodeURIComponent((await params).symbol);
   const period = request.nextUrl.searchParams.get("period") || "1mo";
   const interval = request.nextUrl.searchParams.get("interval") || "1d";
 

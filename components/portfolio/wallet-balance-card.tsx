@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 
-export function WalletBalanceCard({ balance }: { balance: number }) {
+export function WalletBalanceCard({ balance, currency }: { balance: number; currency: string }) {
   return (
     <Card className="bg-white/80 dark:bg-zinc-900/80 border-zinc-200 dark:border-zinc-800 backdrop-blur-xl mb-8">
       <CardContent className="p-6">
@@ -10,7 +10,7 @@ export function WalletBalanceCard({ balance }: { balance: number }) {
               Virtual Wallet Balance (Purchasing Power)
             </p>
             <p className="text-3xl sm:text-4xl font-bold text-zinc-900 dark:text-white">
-              ${balance.toLocaleString("en-US", { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
+              {new Intl.NumberFormat("en-US", { style: "currency", currency }).format(balance)}
             </p>
           </div>
           <div className="flex flex-col sm:items-end gap-2">

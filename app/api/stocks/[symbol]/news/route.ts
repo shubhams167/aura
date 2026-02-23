@@ -5,7 +5,7 @@ export async function GET(
   { params }: { params: Promise<{ symbol: string }> }
 ) {
   try {
-    const symbol = (await params).symbol;
+    const symbol = decodeURIComponent((await params).symbol);
     const { searchParams } = new URL(request.url);
     const limit = searchParams.get("limit") || "10";
 

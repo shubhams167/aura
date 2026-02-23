@@ -271,10 +271,10 @@ export function StockSearch({ compact = false }: StockSearchProps) {
         <button
           type="button"
           onClick={openOverlay}
-          className="flex items-center gap-2 w-full h-10 px-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm text-zinc-400 dark:text-zinc-500 hover:border-emerald-500/50 dark:hover:border-emerald-500/40 hover:text-zinc-500 dark:hover:text-zinc-400 transition-all duration-300 cursor-pointer group"
+          className="flex items-center md:gap-2 w-10 md:w-full h-10 justify-center md:justify-start md:px-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm text-zinc-400 dark:text-zinc-500 hover:border-emerald-500/50 dark:hover:border-emerald-500/40 hover:text-zinc-500 dark:hover:text-zinc-400 transition-all duration-300 cursor-pointer group"
         >
           <Search className="w-4 h-4 shrink-0 transition-colors group-hover:text-emerald-500" />
-          <span className="text-sm truncate">Search stocks...</span>
+          <span className="hidden md:inline text-sm truncate">Search stocks...</span>
           <kbd className="hidden sm:inline-flex items-center gap-0.5 ml-auto shrink-0 rounded border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 text-[10px] font-mono text-zinc-400 dark:text-zinc-500">
             ⌘K
           </kbd>

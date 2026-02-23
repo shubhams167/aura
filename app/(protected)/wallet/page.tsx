@@ -2,7 +2,7 @@ import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { BackgroundEffects } from "@/components/background-effects";
 import { auth } from "@/lib/auth";
-import { getWallet } from "@/lib/actions/wallet";
+import { getWallets } from "@/lib/actions/wallet";
 import { WalletBalanceCard } from "@/components/portfolio/wallet-balance-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
@@ -11,9 +11,10 @@ export default async function WalletPage() {
   const session = await auth();
   const firstName = session?.user?.name?.split(" ")[0] || "User";
 
-  const wallet = await getWallet();
-  const walletBalance = parseFloat(wallet?.balance as string || "0");
-  const transactions = (wallet as any)?.transactions || [];
+  const wallets = await getWallets();
+  const sortedTransactions = wallets
+    .flatMap((w: any) => w.transactions || [])
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-zinc-100 via-zinc-50 to-white dark:from-zinc-900 dark:via-zinc-950 dark:to-black transition-colors duration-300">
@@ -31,7 +32,13 @@ export default async function WalletPage() {
             </p>
           </div>
 
-          <WalletBalanceCard balance={walletBalance} />
+          {wallets.length === 0 ? (
+            <WalletBalanceCard balance={0} currency="USD" />
+          ) : (
+            wallets.map((w: any) => (
+              <WalletBalanceCard key={w.id} balance={parseFloat(w.balance || "0")} currency={w.currency} />
+            ))
+          )}
 
           <Card className="bg-white/80 dark:bg-zinc-900/80 border-zinc-200 dark:border-zinc-800 backdrop-blur-xl">
             <CardHeader>
@@ -40,9 +47,9 @@ export default async function WalletPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {transactions.length > 0 ? (
+              {sortedTransactions.length > 0 ? (
                 <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                  {transactions.map((tx: any) => (
+                  {sortedTransactions.map((tx: any) => (
                     <div key={tx.id} className="py-4 flex items-center justify-between">
                       <div>
                         <div className="flex items-center gap-2 mb-1">

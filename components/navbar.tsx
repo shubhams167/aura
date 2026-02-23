@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 import { StockSearch } from "@/components/stocks/stock-search";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
@@ -18,16 +17,10 @@ export async function Navbar() {
 				<Link href="/">
 					<Logo size="sm" />
 				</Link>
-				<Badge
-					variant="secondary"
-					className="hidden sm:inline-flex bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20 text-xs"
-				>
-					Beta
-				</Badge>
 			</div>
 
 			{isAuthenticated && (
-				<div className="hidden md:flex flex-1 justify-center max-w-xl">
+				<div className="flex flex-1 justify-end md:justify-center max-w-xl">
 					<StockSearch compact />
 				</div>
 			)}

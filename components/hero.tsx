@@ -17,7 +17,7 @@ export function Hero({ user }: HeroProps) {
 				variant="outline"
 				className="mb-4 sm:mb-6 border-zinc-300 dark:border-white/10 text-zinc-600 dark:text-zinc-400 px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm"
 			>
-				✨ Real-time market data powered by AI
+				✨ Gamified Virtual Wallet & Live Market Data
 			</Badge>
 
 			{user ? (
@@ -31,8 +31,7 @@ export function Hero({ user }: HeroProps) {
 					</h1>
 
 					<p className="text-base sm:text-lg lg:text-xl text-zinc-600 dark:text-zinc-400 mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-2">
-						Your personalized dashboard is ready. Track your investments,
-						analyze market trends, and discover new opportunities.
+						Welcome to your new trading hub. Start building your portfolio with your virtual wallet, track live market trends, and navigate the latest news.
 					</p>
 
 					<div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
@@ -41,8 +40,8 @@ export function Hero({ user }: HeroProps) {
 							className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-white px-6 sm:px-8 h-12 sm:h-14 text-base sm:text-lg rounded-full shadow-lg shadow-emerald-500/25 transition-all hover:shadow-emerald-500/40 hover:scale-105"
 							asChild
 						>
-							<Link href="/dashboard">
-								Go to Dashboard
+							<Link href="/stocks">
+								Explore Stocks
 								<svg
 									className="w-4 h-4 sm:w-5 sm:h-5 ml-2"
 									fill="none"
@@ -81,9 +80,9 @@ export function Hero({ user }: HeroProps) {
 					</h1>
 
 					<p className="text-base sm:text-lg lg:text-xl text-zinc-600 dark:text-zinc-400 mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-2">
-						Aura gives you the power to monitor markets, analyze trends, and
-						make smarter investment decisions with real-time insights and
-						beautiful visualizations.
+						Aura gives you the power to monitor live markets, trade with a gamified virtual wallet, and
+						make smarter investment decisions with real-time news and
+						beautiful charts.
 					</p>
 
 					<div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">

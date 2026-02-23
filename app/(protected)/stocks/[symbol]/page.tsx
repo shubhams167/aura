@@ -17,7 +17,7 @@ export default async function StockDetailPage({ params }: StockDetailPageProps) 
 
       <main className="relative z-10 flex-1 px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="max-w-7xl mx-auto">
-          <StockDetailContent symbol={symbol.toUpperCase()} />
+          <StockDetailContent symbol={decodeURIComponent(symbol).toUpperCase()} />
         </div>
       </main>
 
