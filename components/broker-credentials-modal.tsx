@@ -24,8 +24,9 @@ interface BrokerCredentialsModalProps {
 }
 
 const brokerInfo: Record<
-  BrokerType,
+  Exclude<BrokerType, "virtual">,
   {
+
     name: string;
     logo: string;
     bgColor: string;
@@ -91,7 +92,7 @@ export function BrokerCredentialsModal({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (!broker) return null;
+  if (!broker || broker === "virtual") return null;
 
   const info = brokerInfo[broker];
 

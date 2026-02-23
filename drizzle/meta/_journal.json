@@ -36,6 +36,20 @@
       "when": 1771765351680,
       "tag": "0004_naive_silver_surfer",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1771783670142,
+      "tag": "0005_talented_charles_xavier",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1771790036083,
+      "tag": "0006_lucky_captain_marvel",
+      "breakpoints": true
     }
   ]
 }

@@ -11,9 +11,10 @@ interface NavLink {
 }
 
 const navLinks: NavLink[] = [
-  { href: "/portfolio", label: "Portfolio", requiresAuth: true },
   { href: "/stocks", label: "Stocks", requiresAuth: true },
+  { href: "/portfolio", label: "Portfolio", requiresAuth: true },
   { href: "/dashboard", label: "Dashboard", requiresAuth: true },
+  { href: "/wallet", label: "Wallet", requiresAuth: true },
 ];
 
 interface NavLinksProps {

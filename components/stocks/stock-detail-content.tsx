@@ -13,6 +13,7 @@ import {
   Users,
   BarChart3,
   ExternalLink,
+  ChevronDown,
 } from "lucide-react";
 import { cn, formatCurrency, formatCompactCurrency } from "@/lib/utils";
 import {
@@ -23,15 +24,24 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { Button } from "@/components/ui/button";
 import { AddToWatchlistMenu } from "@/components/watchlists/add-to-watchlist-menu";
 import { StockLogo } from "./stock-logo";
 import { StockNews } from "./stock-news";
+import { TradeDialog } from "./trade-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface StockDetailContentProps {
   symbol: string;
 }
 
 const PERIODS = [
+  { label: "1D", value: "1d", interval: "1m" },
   { label: "1W", value: "5d", interval: "1d" },
   { label: "1M", value: "1mo", interval: "1d" },
   { label: "3M", value: "3mo", interval: "1d" },
@@ -41,7 +51,7 @@ const PERIODS = [
 ];
 
 export function StockDetailContent({ symbol }: StockDetailContentProps) {
-  const [selectedPeriod, setSelectedPeriod] = useState(PERIODS[1]); // default: 1M
+  const [selectedPeriod, setSelectedPeriod] = useState(PERIODS[0]); // default: 1D
 
   // Fetch quote
   const { data: quote, isLoading: quoteLoading } = useQuery({
@@ -86,6 +96,21 @@ export function StockDetailContent({ symbol }: StockDetailContentProps) {
       price: bar.close,
       volume: bar.volume,
     })) || [];
+
+  if (selectedPeriod.value === "1d" && quote?.price && chartData.length > 0) {
+    const lastBar = chartData[chartData.length - 1];
+    const liveTime = quote.timestamp ? new Date(quote.timestamp).getTime() : Date.now();
+    const lastBarTime = new Date(lastBar.date).getTime();
+
+    // Only append quote if strictly newer than the last closed minute bar
+    if (liveTime > lastBarTime) {
+      chartData.push({
+        date: quote.timestamp || new Date().toISOString(),
+        price: quote.price,
+        volume: 0,
+      });
+    }
+  }
 
   const formatLargeNumber = (n?: number) => {
     if (!n) return "—";
@@ -133,10 +158,26 @@ export function StockDetailContent({ symbol }: StockDetailContentProps) {
           </div>
 
           <div className="text-left sm:text-right">
-            <p className="text-3xl sm:text-4xl font-bold text-zinc-900 dark:text-white">
-              {quote.price ? formatCurrency(quote.price, quote.currency) : "—"}
-            </p>
-            <div className="flex items-center gap-2 sm:justify-end">
+            <div className="flex items-center justify-end">
+              <p className="text-3xl sm:text-4xl font-bold text-zinc-900 dark:text-white">
+                {quote?.price ? formatCurrency(quote.price, quote.currency) : "—"}
+              </p>
+              {quote?.price && (
+                <div className="flex items-center gap-2 ml-4">
+                  <TradeDialog symbol={symbol} price={quote.price} currency={quote.currency} initialType="BUY">
+                    <Button className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20 px-8">
+                      Buy
+                    </Button>
+                  </TradeDialog>
+                  <TradeDialog symbol={symbol} price={quote.price} currency={quote.currency} initialType="SELL">
+                    <Button className="bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20 px-8">
+                      Sell
+                    </Button>
+                  </TradeDialog>
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-2 sm:justify-end mt-2">
               <div
                 className={cn(
                   "flex items-center gap-1 px-2 py-1 rounded-lg text-sm font-medium",
@@ -147,8 +188,8 @@ export function StockDetailContent({ symbol }: StockDetailContentProps) {
               >
                 {isPositive ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
                 {isPositive ? "+" : ""}
-                {quote.change?.toFixed(2)} ({isPositive ? "+" : ""}
-                {quote.change_percent?.toFixed(2)}%)
+                {quote?.change?.toFixed(2)} ({isPositive ? "+" : ""}
+                {quote?.change_percent?.toFixed(2)}%)
               </div>
             </div>
           </div>
@@ -166,7 +207,8 @@ export function StockDetailContent({ symbol }: StockDetailContentProps) {
           <h2 className="text-base font-semibold text-zinc-900 dark:text-white">
             Price History
           </h2>
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-zinc-100 dark:bg-zinc-800">
+          {/* Desktop Period Selector */}
+          <div className="hidden sm:flex items-center gap-1 p-1 rounded-xl bg-zinc-100 dark:bg-zinc-800">
             {PERIODS.map((period) => (
               <button
                 key={period.value}
@@ -181,6 +223,32 @@ export function StockDetailContent({ symbol }: StockDetailContentProps) {
                 {period.label}
               </button>
             ))}
+          </div>
+
+          {/* Mobile Period Selector */}
+          <div className="sm:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm border border-zinc-200 dark:border-zinc-700">
+                  {selectedPeriod.label}
+                  <ChevronDown className="w-3 h-3 text-zinc-500" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-32 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800">
+                {PERIODS.map((period) => (
+                  <DropdownMenuItem
+                    key={period.value}
+                    onClick={() => setSelectedPeriod(period)}
+                    className={cn(
+                      "text-xs cursor-pointer",
+                      selectedPeriod.value === period.value && "bg-zinc-100 dark:bg-zinc-800 font-semibold"
+                    )}
+                  >
+                    {period.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -209,6 +277,9 @@ export function StockDetailContent({ symbol }: StockDetailContentProps) {
                 dataKey="date"
                 tickFormatter={(d) => {
                   const date = new Date(d);
+                  if (selectedPeriod.value === "1d") {
+                    return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+                  }
                   if (selectedPeriod.value === "5d" || selectedPeriod.value === "1mo") {
                     return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
                   }
@@ -235,11 +306,11 @@ export function StockDetailContent({ symbol }: StockDetailContentProps) {
                     return (
                       <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-3 shadow-lg">
                         <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                          {new Date(d.date).toLocaleDateString("en-US", {
+                          {new Date(d.date).toLocaleString("en-US", {
                             weekday: "short",
                             month: "short",
                             day: "numeric",
-                            year: "numeric",
+                            ...(selectedPeriod.value === "1d" ? { hour: "numeric", minute: "2-digit" } : { year: "numeric" })
                           })}
                         </p>
                         <p className="text-base font-bold text-zinc-900 dark:text-white mt-1">

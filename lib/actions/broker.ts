@@ -14,7 +14,7 @@ import {
   EnrichedHolding
 } from "@/lib/api/groww";
 
-export type BrokerType = "groww" | "upstox" | "zerodha";
+export type BrokerType = "groww" | "upstox" | "zerodha" | "virtual";
 
 export interface ConnectBrokerResult {
   success: boolean;

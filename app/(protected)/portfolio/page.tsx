@@ -11,11 +11,7 @@ export default async function PortfolioPage() {
 
   // Fetch initial data server-side for fast first paint
   const holdingsResult = await getMergedHoldings();
-
   const holdings = holdingsResult.success ? holdingsResult.holdings : [];
-  const sources = holdingsResult.success ? holdingsResult.sources : [];
-  const errors = holdingsResult.success ? holdingsResult.errors : undefined;
-  const error = !holdingsResult.success ? holdingsResult.error : undefined;
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-zinc-100 via-zinc-50 to-white dark:from-zinc-900 dark:via-zinc-950 dark:to-black transition-colors duration-300">
@@ -35,12 +31,8 @@ export default async function PortfolioPage() {
             </p>
           </div>
 
-          {/* Portfolio Content - Client Component with React Query */}
           <PortfolioContent
             initialHoldings={holdings}
-            initialSources={sources}
-            initialErrors={errors}
-            initialError={error}
           />
         </div>
       </main>

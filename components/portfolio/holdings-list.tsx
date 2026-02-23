@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { UnifiedHolding } from "@/lib/types/holdings";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import { ArrowUpDown, TrendingUp, Wallet, BarChart3 } from "lucide-react";
 
 type SortField = "invested" | "current" | "pnl";
@@ -52,7 +53,10 @@ function HoldingRow({ holding }: { holding: UnifiedHolding }) {
   const showMultipleBrokers = holding.brokers.length > 1;
 
   return (
-    <div className="flex items-center justify-between py-4 border-b border-zinc-100 dark:border-zinc-800 last:border-0">
+    <Link
+      href={`/stocks/${holding.trading_symbol}`}
+      className="flex items-center justify-between py-4 border-b border-zinc-100 dark:border-zinc-800 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer px-2 -mx-2 rounded-lg"
+    >
       <div className="flex items-center gap-3">
         <div
           className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm"
@@ -72,7 +76,7 @@ function HoldingRow({ holding }: { holding: UnifiedHolding }) {
             )}
           </div>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            {holding.quantity} shares · ₹{holding.average_price.toFixed(2)} avg
+            {holding.quantity} shares · {formatCurrency(holding.average_price, holding.currency || "INR")} avg
           </p>
           <BrokerBadges brokers={holding.brokers} />
         </div>
@@ -81,10 +85,10 @@ function HoldingRow({ holding }: { holding: UnifiedHolding }) {
       <div className="text-right">
         <div className="flex items-center gap-2 justify-end mb-1">
           <span className="text-sm text-zinc-500 dark:text-zinc-400">
-            LTP: ₹{holding.current_price.toLocaleString("en-IN", { maximumFractionDigits: 2 })}
+            LTP: {formatCurrency(holding.current_price, holding.currency || "INR")}
           </span>
           <p className="font-medium text-zinc-900 dark:text-white">
-            ₹{holding.current_value.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
+            {formatCurrency(holding.current_value, holding.currency || "INR", { maximumFractionDigits: 0 })}
           </p>
         </div>
         <div className="flex items-center gap-2 justify-end">
@@ -97,11 +101,11 @@ function HoldingRow({ holding }: { holding: UnifiedHolding }) {
                 : "bg-red-500/10 text-red-600 dark:text-red-400"
             )}
           >
-            {isProfitable ? "+" : ""}₹{holding.pnl.toLocaleString("en-IN", { maximumFractionDigits: 0 })} ({isProfitable ? "+" : ""}{holding.pnl_percent.toFixed(2)}%)
+            {isProfitable ? "+" : ""}{formatCurrency(holding.pnl, holding.currency || "INR", { maximumFractionDigits: 0 })} ({isProfitable ? "+" : ""}{holding.pnl_percent.toFixed(2)}%)
           </Badge>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -157,8 +161,11 @@ export function HoldingsList({ holdings, sources }: HoldingsListProps) {
     }
   };
 
-  const totalPnL = holdings.reduce((sum, h) => sum + h.pnl, 0);
-  const isProfitable = totalPnL >= 0;
+  const pnlByCurrency = holdings.reduce((acc, h) => {
+    const currency = h.currency || "USD";
+    acc[currency] = (acc[currency] || 0) + h.pnl;
+    return acc;
+  }, {} as Record<string, number>);
 
   const sortButtons: { field: SortField; label: string; icon: React.ReactNode }[] = [
     { field: "invested", label: "Invested", icon: <Wallet className="w-3.5 h-3.5" /> },
@@ -175,17 +182,23 @@ export function HoldingsList({ holdings, sources }: HoldingsListProps) {
           </CardTitle>
           {holdings.length > 0 && (
             <div className="flex items-center gap-2">
-              <Badge
-                variant="secondary"
-                className={cn(
-                  "text-xs",
-                  isProfitable
-                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                    : "bg-red-500/10 text-red-600 dark:text-red-400"
-                )}
-              >
-                P&L: {isProfitable ? "+" : ""}₹{totalPnL.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
-              </Badge>
+              {Object.entries(pnlByCurrency).map(([currency, pnl]) => {
+                const isProfitable = pnl >= 0;
+                return (
+                  <Badge
+                    key={currency}
+                    variant="secondary"
+                    className={cn(
+                      "text-xs",
+                      isProfitable
+                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                        : "bg-red-500/10 text-red-600 dark:text-red-400"
+                    )}
+                  >
+                    P&L ({currency}): {isProfitable ? "+" : ""}{formatCurrency(pnl, currency, { maximumFractionDigits: 0 })}
+                  </Badge>
+                );
+              })}
               <Badge variant="outline" className="text-zinc-500">
                 {holdings.length}
               </Badge>

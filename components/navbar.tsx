@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { StockSearch } from "@/components/stocks/stock-search";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -7,11 +8,7 @@ import { UserMenu } from "@/components/user-menu";
 import { NavLinks } from "@/components/nav-links";
 import { auth } from "@/lib/auth";
 
-interface NavbarProps {
-	searchSlot?: React.ReactNode;
-}
-
-export async function Navbar({ searchSlot }: NavbarProps = {}) {
+export async function Navbar() {
 	const session = await auth();
 	const isAuthenticated = !!session?.user;
 
@@ -29,9 +26,9 @@ export async function Navbar({ searchSlot }: NavbarProps = {}) {
 				</Badge>
 			</div>
 
-			{searchSlot && isAuthenticated && (
+			{isAuthenticated && (
 				<div className="hidden md:flex flex-1 justify-center max-w-xl">
-					{searchSlot}
+					<StockSearch compact />
 				</div>
 			)}
 

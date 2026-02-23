@@ -17,16 +17,10 @@ import { BrokerType } from "@/lib/actions/broker";
 
 interface PortfolioContentProps {
   initialHoldings: UnifiedHolding[];
-  initialSources?: BrokerType[];
-  initialErrors?: { broker: BrokerType; error: string }[];
-  initialError?: string;
 }
 
 export function PortfolioContent({
   initialHoldings,
-  initialSources = [],
-  initialErrors,
-  initialError,
 }: PortfolioContentProps) {
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [displayTime, setDisplayTime] = useState<string>("just now");
@@ -50,8 +44,7 @@ export function PortfolioContent({
     initialData: initialHoldings.length > 0 ? {
       success: true as const,
       holdings: initialHoldings,
-      sources: initialSources,
-      errors: initialErrors,
+      sources: [],
     } : undefined,
     refetchInterval: autoRefresh ? 10000 : false, // 10 seconds when enabled
     refetchOnWindowFocus: false,
@@ -80,9 +73,6 @@ export function PortfolioContent({
   }, [holdingsUpdatedAt]);
 
   const holdings = holdingsResult?.holdings || [];
-  const sources = holdingsResult?.sources || [];
-  const partialErrors = holdingsResult?.errors;
-  const error = initialError || (queryError instanceof Error ? queryError.message : null);
 
   const handleManualRefresh = () => {
     refetchHoldings();
@@ -134,53 +124,7 @@ export function PortfolioContent({
         </div>
       </div>
 
-      {/* Partial Error State - Some brokers failed but we have data from others */}
-      {partialErrors && partialErrors.length > 0 && holdings.length > 0 && (
-        <div className="mb-6 p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm text-amber-700 dark:text-amber-300">
-                Some brokers could not be fetched:
-              </p>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {partialErrors.map((err) => (
-                  <Badge
-                    key={err.broker}
-                    variant="outline"
-                    className="text-xs bg-amber-100 dark:bg-amber-900/30 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300"
-                  >
-                    {err.broker}: {err.error}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* Error State - No data at all */}
-      {error && holdings.length === 0 && (
-        <div className="mb-8 p-6 rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="w-6 h-6 text-amber-500 shrink-0 mt-0.5" />
-            <div>
-              <h3 className="font-semibold text-amber-800 dark:text-amber-200 mb-1">
-                Connect Your Broker
-              </h3>
-              <p className="text-sm text-amber-700 dark:text-amber-300 mb-3">
-                {error}
-              </p>
-              <Button asChild size="sm" className="bg-amber-500 hover:bg-amber-600 text-white">
-                <Link href="/">
-                  <Link2 className="w-4 h-4 mr-2" />
-                  Connect Broker
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Summary Cards */}
       {holdings.length > 0 && (
@@ -197,7 +141,7 @@ export function PortfolioContent({
       )}
 
       {/* Holdings List */}
-      <HoldingsList holdings={holdings} sources={sources} />
+      <HoldingsList holdings={holdings} />
     </>
   );
 }

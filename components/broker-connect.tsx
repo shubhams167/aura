@@ -15,7 +15,7 @@ import { Check, Link2, Unlink, Loader2, RefreshCw, LogIn, AlertTriangle } from "
 import Image from "next/image";
 
 const brokerDetails: Record<
-  BrokerType,
+  Exclude<BrokerType, "virtual">,
   {
     name: string;
     description: string;
@@ -133,7 +133,7 @@ export function BrokerConnect() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {(Object.keys(brokerDetails) as BrokerType[]).map((broker) => {
+        {(Object.keys(brokerDetails) as Exclude<BrokerType, "virtual">[]).map((broker) => {
           const details = brokerDetails[broker];
           const connection = connections.find((c) => c.broker === broker);
           const isConnected = connection?.connected;

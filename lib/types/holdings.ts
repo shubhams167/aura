@@ -19,6 +19,8 @@ export interface UnifiedHolding {
   invested_value: number;
   /** Current market value (quantity * current_price) */
   current_value: number;
+  /** Currency of the holding (e.g. USD, INR) */
+  currency?: string;
   /** Profit/Loss in absolute terms */
   pnl: number;
   /** Profit/Loss as percentage */

@@ -224,8 +224,53 @@ async function fetchZerodhaHoldingsForUser(): Promise<{
   }
 }
 
+import { getPortfolio } from "./wallet";
+
 /**
- * Get merged holdings from all connected brokers
+ * Fetch Virtual Wallet holdings for current user
+ */
+async function fetchVirtualHoldingsForUser(): Promise<{
+  success: true;
+  holdings: UnifiedHolding[];
+} | {
+  success: false;
+  error: string;
+}> {
+  try {
+    const portfolio = await getPortfolio();
+    if (!portfolio || portfolio.holdings.length === 0) {
+      return { success: true, holdings: [] };
+    }
+
+    const holdings: UnifiedHolding[] = portfolio.holdings.map((h: any) => ({
+      isin: h.symbol, // Use symbol as a placeholder ISIN for virtual holdings
+      trading_symbol: h.symbol,
+      quantity: h.shares,
+      average_price: h.avgCost,
+      current_price: h.currentPrice,
+      invested_value: h.shares * h.avgCost,
+      current_value: h.value,
+      pnl: h.gain,
+      pnl_percent: h.gainPercent,
+      brokers: ["virtual"],
+      exchange: "VIRTUAL",
+      currency: h.currency || "USD",
+      day_change: h.change * h.shares,
+      day_change_percent: h.changePercent,
+    }));
+
+    return { success: true, holdings };
+  } catch (error) {
+    console.error("Error fetching Virtual Wallet holdings:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to fetch Virtual Wallet",
+    };
+  }
+}
+
+/**
+ * Get merged holdings from all connected brokers + virtual wallet
  * Returns unified holdings with broker source information
  */
 export async function getMergedHoldings(): Promise<MergedHoldingsResponse> {
@@ -240,20 +285,27 @@ export async function getMergedHoldings(): Promise<MergedHoldingsResponse> {
       where: eq(brokerCredentials.userId, session.user.id),
     });
 
-    if (connections.length === 0) {
-      return {
-        success: false,
-        error: "No brokers connected. Please connect at least one broker.",
-      };
-    }
-
     const connectedBrokers = connections.map((c) => c.broker as BrokerType);
     const allHoldings: UnifiedHolding[] = [];
     const errors: { broker: BrokerType; error: string }[] = [];
     const successfulSources: BrokerType[] = [];
 
-    // Fetch holdings from each connected broker in parallel
+    // Fetch holdings from each connected broker + virtual wallet in parallel
     const fetchPromises: Promise<void>[] = [];
+
+    // Always fetch virtual wallet
+    fetchPromises.push(
+      fetchVirtualHoldingsForUser().then((result) => {
+        if (result.success) {
+          if (result.holdings.length > 0) {
+            allHoldings.push(...result.holdings);
+            successfulSources.push("virtual");
+          }
+        } else {
+          errors.push({ broker: "virtual", error: result.error });
+        }
+      })
+    );
 
     if (connectedBrokers.includes("groww")) {
       fetchPromises.push(
@@ -283,11 +335,21 @@ export async function getMergedHoldings(): Promise<MergedHoldingsResponse> {
 
     await Promise.all(fetchPromises);
 
-    // If no holdings fetched from any broker
+    // If no holdings fetched from any broker and there are errors (ignoring virtual if it just has no holdings)
     if (allHoldings.length === 0 && errors.length > 0) {
       // All brokers failed
       const errorMessages = errors.map((e) => `${e.broker}: ${e.error}`).join("; ");
       return { success: false, error: errorMessages };
+    }
+
+    // Explicitly handle when user has NO connections AND NO virtual holdings
+    if (allHoldings.length === 0 && connections.length === 0) {
+      // Just return empty array, don't throw error to allow empty state to render
+      return {
+        success: true,
+        holdings: [],
+        sources: [],
+      };
     }
 
     // Merge holdings by ISIN
